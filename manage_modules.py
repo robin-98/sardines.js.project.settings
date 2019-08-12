@@ -22,6 +22,7 @@ def get_proj_name(dir):
 def exec_cmd(cmd, dir):
     print('------------ in', dir, '-------------')
     print(cmd)
+    os.system('pwd')
     os.system('cd '+dir)
     os.system(cmd)
     os.system('cd -')
