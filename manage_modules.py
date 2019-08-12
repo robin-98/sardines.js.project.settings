@@ -29,6 +29,6 @@ dir_list = sequence.split(' ')
 
 for dir in dir_list:
     if is_save:
-        exec_cmd('git add . && git commit -m ' + message + ' && git push origin master', dir)
+        exec_cmd('git add . ; git commit -m ' + message + ' ; git push origin master', dir)
 
 
