@@ -1,3 +1,6 @@
 BND*
 sardines*
 .idea*
+bin/node-*
+state-engine*
+.DS_Store

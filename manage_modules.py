@@ -5,18 +5,52 @@ import json
 
 is_save = False
 is_publish = False
-message = None
+target_name = None
+message = '"sardine project automatic save point"'
 if len(sys.argv) > 1:
-    if sys.argv[1] == 'save' or sys.argv[1] == 'publish':
+    if sys.argv[1] == 'save':
         is_save = True
-        if len(sys.argv) > 2:
-            message = sys.argv[2]
-        else:
-            message = '"sardine project automatic save point"'
     if sys.argv[1] == 'publish':
         is_publish = True
+        is_save = True
 
-sequence="sardines.core.js sardines.built-in-services.js sardines.compile-time-tools.js sardines.shoal.js sardines.shoal.service-provider.http.js sardines.shoal.service-driver.http.js"
+if len(sys.argv) > 2:
+    target_name = sys.argv[2]
+
+
+sequence="sardines.core.js sardines.built-in-services.js sardines.compile-time-tools.js sardines.shoal.js sardines.service-provider.http.js sardines.service-driver.http.js"
+packages = {
+    "sardines.core.js": {
+        "name": "sardines-core",
+        "links": [],
+        "linkSelf": True,
+    },
+    "sardines.built-in-services.js": {
+        "name": "sardines-built-in-services",
+        "links": ["sardines.core.js"],
+        "linkSelf": True,
+    },
+    "sardines.compile-time-tools.js": {
+        "name": "sardines-compile-time-tools",
+        "links": ["sardines.core.js"],
+        "linkSelf": True,
+    },
+    "sardines.shoal.js": {
+        "name": "sardines-shoal",
+        "links": ["sardines.core.js", "sardines.built-in-services.js", 'sardines.compile-time-tools.js'],
+        "linkSelf": False,
+    },
+    "sardines.service-provider.http.js": {
+        "name": "sardines-service-provider-http",
+        "links": ["sardines.core.js"],
+        "linkSelf": False,
+    },
+    "sardines.service-driver.http.js": {
+        "name": "sardines-service-driver-http",
+        "links": ["sardines.core.js"],
+        "linkSelf": False,
+    },
+}
 
 
 def get_proj_name(dir):
@@ -31,8 +65,23 @@ def exec_cmd(cmd, dir):
 dir_list = sequence.split(' ')
 
 for dir in dir_list:
+    if target_name is not None and target_name != dir:
+        continue
+
     if is_save:
         exec_cmd('git add . ; git commit -m ' + message + ' ; git push origin master', dir)
     if is_publish:
+        exec_cmd('rm -rf node_modules', dir)
+        exec_cmd('npm i', dir)
         exec_cmd('npm version patch && npm publish', dir)
+        if dir in packages:
+            pkgSettings = packages[dir]
+            for link in pkgSettings['links']:
+                linkedPkgName = packages[link]["name"]
+                exec_cmd('npm link '+linkedPkgName, dir)
+            if pkgSettings["linkSelf"]:
+                exec_cmd('npm link', dir)
+
+
+    
 
