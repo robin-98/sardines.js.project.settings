@@ -5,21 +5,33 @@ import json
 
 is_save = False
 is_publish = False
+is_link = False
+is_unlink = False
 target_name = None
 message = '"sardine project automatic save point"'
 if len(sys.argv) > 1:
     if sys.argv[1] == 'save':
         is_save = True
+    if sys.argv[1] == 'link':
+        is_link = True
+    if sys.argv[1] == 'unlink':
+        is_unlink = True
     if sys.argv[1] == 'publish':
         is_publish = True
         is_save = True
+        is_link = True
 
 if len(sys.argv) > 2:
     target_name = sys.argv[2]
 
 
-sequence="sardines.core.js sardines.built-in-services.js sardines.compile-time-tools.js sardines.shoal.js sardines.service-provider.http.js sardines.service-driver.http.js"
+sequence="sardines.core.js sardines.built-in-services.js sardines.compile-time-tools.js sardines.shoal.js sardines.service-provider.http.js sardines.service-driver.http.js state-engine"
 packages = {
+    "state-engine": {
+        "name": "state-engine",
+        "links": [],
+        "linkSelf": False,
+    },
     "sardines.core.js": {
         "name": "sardines-core",
         "links": [],
@@ -74,14 +86,16 @@ for dir in dir_list:
         exec_cmd('rm -rf node_modules', dir)
         exec_cmd('npm i', dir)
         exec_cmd('npm version patch && npm publish', dir)
-        if dir in packages:
-            pkgSettings = packages[dir]
-            for link in pkgSettings['links']:
-                linkedPkgName = packages[link]["name"]
-                exec_cmd('npm link '+linkedPkgName, dir)
-            if pkgSettings["linkSelf"]:
-                exec_cmd('npm link', dir)
-
+    if is_link and dir in packages:
+        pkgSettings = packages[dir]
+        for link in pkgSettings['links']:
+            linkedPkgName = packages[link]["name"]
+            exec_cmd('npm link '+linkedPkgName, dir)
+        if pkgSettings["linkSelf"]:
+            exec_cmd('npm link', dir)
+    if is_unlink and dir in packages:
+        if packages[dir]["linkSelf"]:
+            exec_cmd('npm unlink', dir)
 
     
 
