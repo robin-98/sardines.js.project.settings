@@ -25,7 +25,7 @@ if len(sys.argv) > 2:
     target_name = sys.argv[2]
 
 
-sequence="sardines.core.js sardines.built-in-services.js sardines.compile-time-tools.js sardines.shoal.js sardines.service-provider.http.js sardines.service-driver.http.js state-engine"
+sequence="sardines.core.js sardines.built-in-services.js sardines.compile-time-tools.js sardines.shoal.js sardines.service-provider.http.js sardines.service-driver.http.js state-engine sardines.test.js"
 packages = {
     "state-engine": {
         "name": "state-engine",
@@ -61,7 +61,7 @@ packages = {
         "name": "sardines-service-driver-http",
         "links": ["sardines.core.js"],
         "linkSelf": False,
-    },
+    }
 }
 
 
@@ -83,6 +83,8 @@ for dir in dir_list:
     if is_save:
         exec_cmd('git add . ; git commit -m ' + message + ' ; git push origin master', dir)
     if is_publish:
+        if dir == "sardines.test.js":
+            continue
         exec_cmd('rm -rf node_modules', dir)
         exec_cmd('npm i', dir)
         exec_cmd('npm version patch && npm publish', dir)

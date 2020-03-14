@@ -18,4 +18,7 @@ echo JS code: ${jsCnt} lines
 pyCnt=`countLines py . $1`
 echo Py code: ${pyCnt} lines
 
-echo All: `expr ${jsCnt} + ${pyCnt}` lines
+mdCnt=`countLines md . $1`
+echo Documentation: ${mdCnt} lines
+
+echo All: `expr ${jsCnt} + ${pyCnt} + ${mdCnt}` lines
