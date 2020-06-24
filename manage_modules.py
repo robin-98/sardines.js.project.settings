@@ -18,8 +18,6 @@ if len(sys.argv) > 1:
         is_unlink = True
     if sys.argv[1] == 'publish':
         is_publish = True
-        is_save = True
-        is_link = True
 
 if len(sys.argv) > 2:
     target_name = sys.argv[2]
@@ -28,7 +26,7 @@ if len(sys.argv) > 3:
     message = sys.argv[3]
 print("commit message: {}".format(message))
 
-sequence="sardines.core.js sardines.built-in-services.js sardines.compile-time-tools.js sardines.shoal.js sardines.service-provider.http.js sardines.service-driver.http.js state-engine sardines.test.js"
+sequence="sardines.core.js sardines.built-in-services.js sardines.compile-time-tools.js sardines.shoal.js sardines.service-provider.http.js sardines.service-driver.http.js state-engine sardines.docker.js"
 packages = {
     "state-engine": {
         "name": "state-engine",
@@ -85,20 +83,22 @@ for dir in dir_list:
 
     if is_save:
         exec_cmd('git add . ; git commit -m "' + message + '" ; git push origin master', dir)
-    if is_publish:
-        if dir == "sardines.test.js":
-            continue
-        exec_cmd('rm -rf node_modules', dir)
-        exec_cmd('npm i', dir)
-        exec_cmd('npm version patch && npm publish', dir)
-    if is_link and dir in packages:
+    elif is_publish:
+        if dir != "sardines.docker.js":
+            exec_cmd('rm -rf node_modules', dir)
+            exec_cmd('rm -rf package-lock.json', dir)
+            exec_cmd('npm i', dir)
+        exec_cmd('git add . ; git commit -m "' + message + '" ; git push origin master', dir)
+        if dir != "sardines.docker.js":
+            exec_cmd('npm version patch && npm publish', dir)
+    elif is_link and dir in packages:
         pkgSettings = packages[dir]
         for link in pkgSettings['links']:
             linkedPkgName = packages[link]["name"]
             exec_cmd('npm link '+linkedPkgName, dir)
         if pkgSettings["linkSelf"]:
             exec_cmd('npm link', dir)
-    if is_unlink and dir in packages:
+    elif is_unlink and dir in packages:
         if packages[dir]["linkSelf"]:
             exec_cmd('npm unlink', dir)
 
