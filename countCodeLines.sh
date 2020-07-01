@@ -12,13 +12,33 @@ countLines() {
       fi )|awk '{print $1}'
 }
 
-jsCnt=`countLines ts src $1`
-echo JS code: ${jsCnt} lines
+tsCnt=`countLines ts src $1`
+if [ $tsCnt -gt 0 ];then
+    echo TypeScript code: ${tsCnt} lines
+fi
+
+jsCnt=`countLines js src $1`
+if [ $jsCnt -gt 0 ];then
+    echo JavaScript code: ${jsCnt} lines
+fi
+
+jsTestCnt=`countLines js test $1`
+tsTestCnt=`countLines ts test $1`
+jsonTestCnt=`countLines json test $1`
+confTestCnt=`countLines conf test $1`
+testCnt=`expr ${jsTestCnt} + ${tsTestCnt} + ${jsonTestCnt} + ${confTestCnt}`
+if [ $testCnt -gt 0 ];then
+    echo Test code: ${testCnt} lines
+fi
 
 pyCnt=`countLines py . $1`
-echo Py code: ${pyCnt} lines
+if [ $pyCnt -gt 0 ];then
+    echo Python code: ${pyCnt} lines
+fi
 
 mdCnt=`countLines md . $1`
-echo Documentation: ${mdCnt} lines
+if [ $mdCnt -gt 0 ];then
+    echo Documentation: ${mdCnt} lines
+fi
 
-echo All: `expr ${jsCnt} + ${pyCnt} + ${mdCnt}` lines
+echo All: `expr ${tsCnt} + ${jsCnt} + ${testCnt} + ${pyCnt} + ${mdCnt}` lines
